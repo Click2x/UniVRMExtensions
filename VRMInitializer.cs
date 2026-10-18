@@ -38,8 +38,11 @@ namespace Esperecyan.UniVRMExtensions
             blendShapeAvatar.name = "BlendShape";
             blendShapeProxy.BlendShapeAvatar = AssetUtility.Save(prefabPath, blendShapeAvatar);
             blendShapeProxy.BlendShapeAvatar.CreateDefaultPreset();
+            // Walk a snapshot of the default clips: saving each clip makes Unity re-import the temporary folder, which can change
+            // the original list mid-loop and throw ArgumentOutOfRangeException (seen on Unity 2022.3.22f1 with UniVRM 0.128.1).
+            var defaultClips = blendShapeAvatar.Clips.ToList();
             blendShapeAvatar.Clips
-                = blendShapeAvatar.Clips.Select(clip => AssetUtility.Save(prefabPath, clip)).ToList();
+                = defaultClips.Select(clip => AssetUtility.Save(prefabPath, clip)).ToList();
 
             var firstPerson = prefab.AddComponent<VRMFirstPerson>();
             firstPerson.SetDefault();
